@@ -8,7 +8,7 @@ export function useGetBusStops(searchQuery: string) {
             if (searchQuery.length > 0) {
                 const request = await fetch(`https://api.tfl.gov.uk/StopPoint/Search/${searchQuery}?modesFilter=bus&oysterOnly=false&maxResults=20`);
                 const data = await request.json();
-                console.log(JSON.stringify(data, null, 2));
+                // console.log(data);
                 setData(data.matches);
             }
         })();
@@ -19,5 +19,20 @@ export function useGetBusStops(searchQuery: string) {
 }
 
 export function useGetBusStop(id: string) {
-    const [data, setData] = useState<any>()
+    const [data, setData] = useState<any>();
+
+    useEffect(() => {
+        console.log("getting bus stop");
+
+        (async () => {
+            if (id.length > 0) {
+                const request = await fetch(`https://api.tfl.gov.uk/StopPoint/${id}`)
+                const data = await request.json();
+                console.log("bus stop:", data);
+                setData(data);
+            }
+        })();
+    }, [id]);
+
+    return data;
 }
