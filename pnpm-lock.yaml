@@ -26,6 +26,9 @@ importers:
       expo-linking:
         specifier: ~6.3.1
         version: 6.3.1(expo@51.0.24(@babel/core@7.25.2)(@babel/preset-env@7.24.8(@babel/core@7.25.2)))
+      expo-location:
+        specifier: ~17.0.1
+        version: 17.0.1(expo@51.0.24(@babel/core@7.25.2)(@babel/preset-env@7.24.8(@babel/core@7.25.2)))
       expo-router:
         specifier: ~3.5.20
         version: 3.5.20(6dx3i5cacsyi7do7y5qlvz4fte)
@@ -2231,6 +2234,11 @@ packages:
 
   expo-linking@6.3.1:
     resolution: {integrity: sha512-xuZCntSBGWCD/95iZ+mTUGTwHdy8Sx+immCqbUBxdvZ2TN61P02kKg7SaLS8A4a/hLrSCwrg5tMMwu5wfKr35g==}
+
+  expo-location@17.0.1:
+    resolution: {integrity: sha512-m+OzotzlAXO3ZZ1uqW5GC25nXW868zN+ROyBA1V4VF6jGay1ZEs4URPglCVUDzZby2F5wt24cMzqDKw2IX6nRw==}
+    peerDependencies:
+      expo: '*'
 
   expo-modules-autolinking@1.11.1:
     resolution: {integrity: sha512-2dy3lTz76adOl7QUvbreMCrXyzUiF8lygI7iFJLjgIQIVH+43KnFWE5zBumpPbkiaq0f0uaFpN9U0RGQbnKiMw==}
@@ -7775,6 +7783,10 @@ snapshots:
     transitivePeerDependencies:
       - expo
       - supports-color
+
+  expo-location@17.0.1(expo@51.0.24(@babel/core@7.25.2)(@babel/preset-env@7.24.8(@babel/core@7.25.2))):
+    dependencies:
+      expo: 51.0.24(@babel/core@7.25.2)(@babel/preset-env@7.24.8(@babel/core@7.25.2))
 
   expo-modules-autolinking@1.11.1:
     dependencies:
