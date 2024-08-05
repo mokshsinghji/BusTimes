@@ -3656,9 +3656,9 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** true to return the lines that each stop point serves as a nested resource */
         returnLines?: boolean;
         /** @format double */
-        locationLat: number;
+        lat: number;
         /** @format double */
-        locationLon: number;
+        lon: number;
       },
       params: RequestParams = {},
     ) =>

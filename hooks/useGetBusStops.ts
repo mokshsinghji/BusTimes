@@ -6,6 +6,7 @@ import {
   TflApiPresentationEntitiesStopPoint,
   TflApiPresentationEntitiesStopPointsResponse,
 } from "@/hooks/tflApi";
+import * as Location from "expo-location";
 
 export function useGetBusStops(searchQuery: string) {
   const [data, setData] =
@@ -34,7 +35,7 @@ export function useGetBusStops(searchQuery: string) {
 }
 
 export function useGetBusStopInfo(id: string) {
-  const data = useMemo(() => id.length > 0 ? [id] : [], [id]);
+  const data = useMemo(() => (id.length > 0 ? [id] : []), [id]);
   return useGetBusStopsBusInfo(data);
 }
 
@@ -59,6 +60,45 @@ export function useGetBusStopsBusInfo(ids: string[]) {
       }
     })();
   }, [ids]);
+
+  return data;
+}
+
+export function useGetBusStopsByLocation(
+  location: Location.LocationObject | undefined
+) {
+  const [data, setData] =
+    useState<
+      TflApiPresentationEntitiesSearchResponse<TflApiPresentationEntitiesMatchedStop>
+    >();
+
+  useEffect(() => {
+    console.log(
+      `[${new Date().toLocaleString()}], getting bus stops by location`
+    );
+    (async () => {
+      if (location) {
+        const api = new Api();
+        const response = await api.stopPoint.stopPointGetByGeoPoint({
+          radius: 500,
+          stopTypes: ["NaptanPublicBusCoachTram"],
+          // modes: ["bus"],
+          lat: location.coords.latitude,
+          lon: location.coords.longitude,
+        });
+
+        try {
+          const data =
+            (await response.json()) as TflApiPresentationEntitiesSearchResponse<TflApiPresentationEntitiesMatchedStop>;
+
+          console.log(data);
+          setData(data);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    })();
+  }, [location]);
 
   return data;
 }
