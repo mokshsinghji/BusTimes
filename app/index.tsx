@@ -7,7 +7,12 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
 import * as Location from "expo-location";
-import MapView, { Marker, PROVIDER_GOOGLE, UrlTile } from "react-native-maps";
+import MapView, {
+  Callout,
+  Marker,
+  PROVIDER_GOOGLE,
+  UrlTile,
+} from "react-native-maps";
 
 export default function Index() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,6 +27,8 @@ export default function Index() {
 
   const busStopsByLocation = useGetBusStopsByLocation(currentLocation);
 
+  const [selectedBusStopIndex, setSelectedBusStopIndex] = useState(0);
+
   useEffect(() => {
     if (busStops?.matches?.length ?? 0 > 5) {
       const newValue = busStops?.matches?.[4]?.id ?? "";
@@ -35,6 +42,10 @@ export default function Index() {
   useEffect(() => {
     console.log(busStopsByLocation);
   }, [busStopsByLocation]);
+
+  useEffect(() => {
+    console.log("Rerendering");
+  });
 
   useEffect(() => {
     (async () => {
@@ -72,22 +83,32 @@ export default function Index() {
           initialRegion={{
             latitude: currentLocation.coords.latitude,
             longitude: currentLocation.coords.longitude,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
+            latitudeDelta: 0.0025,
+            longitudeDelta: 0.0025,
           }}
           style={{ height: "30%", width: "100%" }}
           provider={PROVIDER_GOOGLE}
+          showsUserLocation={true}
         >
-          <Marker
+          {/* <Marker
             coordinate={currentLocation.coords}
             title="Current location"
-          ></Marker>
-          {busStopsByLocation?.stopPoints?.map((s) => {
+          ></Marker> */}
+          {busStopsByLocation?.stopPoints?.map((s, idx) => {
             return (
               <Marker
                 key={s.id}
                 coordinate={{ latitude: s.lat ?? 0, longitude: s.lon ?? 0 }}
                 title={s.name}
+                description={"Stop: " + s.name}
+                style={
+                  {
+                    // height: 100,
+                  }
+                }
+                onPress={() => {
+                  setSelectedBusStopIndex(idx);
+                }}
               >
                 <View
                   style={{
@@ -98,10 +119,47 @@ export default function Index() {
                     margin: 0,
                     padding: 0,
                     backgroundColor: "red",
+                    justifyContent: "center",
+                    alignContent: "center",
                   }}
                 >
-                  <Text>{s.stopLetter}</Text>
+                  <Text
+                    style={{
+                      color: "white",
+                      fontSize: s.stopLetter.length > 1 ? 10 : 14,
+                    }}
+                  >
+                    {s.stopLetter}
+                  </Text>
                 </View>
+                <Callout style={{ width: "100%" }}>
+                  <View
+                    style={
+                      {
+                        // position: "absolute",
+                        // top: 0,
+                        // left: 0,
+                        // width: "100%",
+                      }
+                    }
+                  >
+                    {(() => {
+                      console.log(s.commonName);
+                      return null;
+                    })()}
+                    <Text style={{ fontSize: 12 }}>{s.commonName}</Text>
+                    <Text style={{ fontSize: 10 }}>{s.name}</Text>
+                  </View>
+                </Callout>
+                {/* <View
+                  style={{
+                    display: idx === selectedBusStopIndex ? "flex" : "none",
+                    backgroundColor: "white",
+                    position: "absolute",
+                  }}
+                >
+                  <Text>{s.commonName}</Text>
+                </View> */}
               </Marker>
             );
           })}
