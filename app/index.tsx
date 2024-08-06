@@ -1,4 +1,11 @@
-import { Text, TextInput, ToastAndroid, View } from "react-native";
+import {
+  Button,
+  Pressable,
+  Text,
+  TextInput,
+  ToastAndroid,
+  View,
+} from "react-native";
 import {
   useGetBusStopInfo,
   useGetBusStops,
@@ -13,6 +20,7 @@ import MapView, {
   PROVIDER_GOOGLE,
   UrlTile,
 } from "react-native-maps";
+import { Link, router } from "expo-router";
 
 export default function Index() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -101,13 +109,11 @@ export default function Index() {
                 coordinate={{ latitude: s.lat ?? 0, longitude: s.lon ?? 0 }}
                 title={s.name}
                 description={"Stop: " + s.name}
-                style={
-                  {
-                    // height: 100,
-                  }
-                }
                 onPress={() => {
                   setSelectedBusStopIndex(idx);
+                }}
+                onCalloutPress={() => {
+                  console.log("Pressed");
                 }}
               >
                 <View
@@ -132,23 +138,55 @@ export default function Index() {
                     {s.stopLetter}
                   </Text>
                 </View>
-                <Callout style={{ width: "100%" }}>
+                <Callout
+                  style={{ width: 150 }}
+                  onPress={() => {
+                    router.push(`/busStop/${s.id}`);
+                  }}
+                >
                   <View
-                    style={
-                      {
-                        // position: "absolute",
-                        // top: 0,
-                        // left: 0,
-                        // width: "100%",
-                      }
-                    }
+                    style={{
+                      // position: "absolute",
+                      // top: 0,
+                      // left: 0,
+                      // width: "100%",
+                      width: 150,
+                      // borderColor: "gray",
+                      // borderWidth: 1,
+                      // borderRadius: 10,
+                      // borderStyle: "solid",
+                    }}
                   >
                     {(() => {
                       console.log(s.commonName);
                       return null;
                     })()}
-                    <Text style={{ fontSize: 12 }}>{s.commonName}</Text>
-                    <Text style={{ fontSize: 10 }}>{s.name}</Text>
+                    <Text style={{ fontSize: 12 }}>
+                      {s.commonName} ({s.stopLetter})
+                    </Text>
+                    {/* <Link href={`/busStop/${s.id}`} asChild> */}
+                    <Pressable
+                      style={{
+                        marginTop: 10,
+                        paddingVertical: 10,
+                        paddingHorizontal: 20,
+                        width: 150,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderColor: "gray",
+                        borderWidth: 1,
+                        borderRadius: 10,
+                        borderStyle: "solid",
+                      }}
+                      onPress={() => {
+                        console.log("Pressed Pressable");
+                      }}
+                    >
+                      <Text style={{ fontSize: 10 }}>Go to Bus Stop </Text>
+                    </Pressable>
+                    {/* </Link> */}
+                    {/* <Text style={{ fontSize: 10 }}>{s.name}</Text> */}
                   </View>
                 </Callout>
                 {/* <View
@@ -163,6 +201,11 @@ export default function Index() {
               </Marker>
             );
           })}
+          {/* <Marker
+            coordinate={currentLocation.coords}
+            title="Test"
+            description="Test Description"
+          ></Marker> */}
           {/* <UrlTile
             urlTemplate="http://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
             maximumZ={19}
