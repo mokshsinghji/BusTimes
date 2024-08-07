@@ -15,6 +15,10 @@ export function useGetBusStops(searchQuery: string) {
       TflApiPresentationEntitiesSearchResponse<TflApiPresentationEntitiesMatchedStop>
     >();
 
+  const [ids, setIds] = useState<string[]>([]);
+
+  const busInfo = useGetBusStopsBusInfo(ids);
+
   useEffect(() => {
     console.log(`[${new Date().toLocaleString()}], getting bus stops`);
     (async () => {
@@ -27,12 +31,13 @@ export function useGetBusStops(searchQuery: string) {
 
         const data =
           (await response.json()) as TflApiPresentationEntitiesSearchResponse<TflApiPresentationEntitiesMatchedStop>;
+        setIds(data.matches?.map((m) => m.id ?? "") ?? []);
         setData(data);
       }
     })();
   }, [searchQuery]);
 
-  return data;
+  return busInfo;
 }
 
 export function useGetBusStopInfo(id: string) {
@@ -44,13 +49,19 @@ export function useGetBusStopsBusInfo(ids: string[]) {
   const [data, setData] = useState<TflApiPresentationEntitiesStopPoint[]>();
 
   useEffect(() => {
-    console.log(new Date().toLocaleString(), "getting bus stops info");
-
     (async () => {
+      console.log(new Date().toLocaleString(), "getting bus stops info");
       if (ids.length > 0 || (ids.length == 1 && ids[0].length == 0)) {
         const api = new Api();
         const response = await api.stopPoint.stopPointGet(ids);
         const data = await response.json();
+
+        console.log();
+        console.log(
+          "data is",
+          await api.stopPoint.stopPointArrivals(ids[0]).then((r) => r.json())
+        );
+        console.log();
 
         if (ids.length == 1) {
           setData([data] as TflApiPresentationEntitiesStopPoint[]);

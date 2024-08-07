@@ -17,7 +17,7 @@ export default function BusStop() {
     typeof stop === "string" ? stop : stop[0]
   );
   const stopInfo = stopPairInfo?.at(0)?.children?.find((c) => c.id === stop);
-  stopArrivals?.push(stopArrivals?.at(-1) ?? { id: "0", timeToStation: 0 });
+  // stopArrivals?.push(stopArrivals?.at(-1) ?? { id: "0", timeToStation: 0 });
   console.log(stopPairInfo?.at(0)?.children?.find((c) => c.id === stop));
 
   return (
@@ -49,19 +49,21 @@ export default function BusStop() {
         </View>
         <Text style={styles.sectionTitle}>Bus Arrivals</Text>
         <ScrollView style={styles.scrollView}>
-          {stopArrivals?.map((a) => (
-            <View key={a.id} style={styles.arrivalItem}>
-              <View style={styles.lineNameContainer}>
-                <Text style={styles.lineName}>{a.lineName}</Text>
+          <View style={styles.arrivalList}>
+            {stopArrivals?.map((a) => (
+              <View key={a.id} style={styles.arrivalItem}>
+                <View style={styles.lineNameContainer}>
+                  <Text style={styles.lineName}>{a.lineName}</Text>
+                </View>
+                <Text style={styles.destinationName}>{a.destinationName}</Text>
+                <Text style={styles.arrivalTime}>
+                  {(a.timeToStation ?? 0) > 0
+                    ? `${Math.floor((a.timeToStation ?? 0) / 60)} mins`
+                    : "Arriving"}
+                </Text>
               </View>
-              <Text style={styles.destinationName}>{a.destinationName}</Text>
-              <Text style={styles.arrivalTime}>
-                {(a.timeToStation ?? 0) > 0
-                  ? `${Math.floor((a.timeToStation ?? 0) / 60)} mins`
-                  : "Arriving"}
-              </Text>
-            </View>
-          ))}
+            ))}
+          </View>
         </ScrollView>
       </View>
     </View>
@@ -71,6 +73,7 @@ export default function BusStop() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "white",
   },
   map: {
     height: 225,
@@ -107,6 +110,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   scrollView: {
+    display: "flex",
+    backgroundColor: "reset",
     flex: 1,
   },
   arrivalItem: {
@@ -114,6 +119,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     height: 60,
+    backgroundColor: "#f8f8f8",
+  },
+  arrivalList: {
+    gap: 10,
   },
   lineNameContainer: {
     height: 40,
@@ -133,6 +142,11 @@ const styles = StyleSheet.create({
   },
   arrivalTime: {
     fontSize: 20,
-    width: 70,
+    width: 100,
+    backgroundColor: "#d8d8d8",
+    paddingHorizontal: 10,
+    textAlign: "center",
+    textAlignVertical: "center",
+    paddingVertical: 5,
   },
 });

@@ -37,15 +37,15 @@ export default function Index() {
 
   const [selectedBusStopIndex, setSelectedBusStopIndex] = useState(0);
 
-  useEffect(() => {
-    if (busStops?.matches?.length ?? 0 > 5) {
-      const newValue = busStops?.matches?.[4]?.id ?? "";
-      if (busStops === newValue) {
-        return;
-      }
-      setId(newValue);
-    }
-  }, [busStops]);
+  // useEffect(() => {
+  //   if (busStops?.matches?.length ?? 0 > 5) {
+  //     const newValue = busStops?.matches?.[4]?.id ?? "";
+  //     if (busStops === newValue) {
+  //       return;
+  //     }
+  //     setId(newValue);
+  //   }
+  // }, [busStops]);
 
   useEffect(() => {
     console.log(busStopsByLocation);
@@ -78,6 +78,8 @@ export default function Index() {
     })();
   }, []);
 
+  console.log("stopPoints:", busStops);
+
   return (
     <View
       style={{
@@ -86,110 +88,109 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      {currentLocation && (
-        <MapView
-          initialRegion={{
-            latitude: currentLocation.coords.latitude,
-            longitude: currentLocation.coords.longitude,
-            latitudeDelta: 0.0025,
-            longitudeDelta: 0.0025,
-          }}
-          style={{ height: "30%", width: "100%" }}
-          provider={PROVIDER_GOOGLE}
-          showsUserLocation={true}
-        >
-          {/* <Marker
+      <MapView
+        region={{
+          latitude: currentLocation?.coords.latitude ?? 0,
+          longitude: currentLocation?.coords.longitude ?? 0,
+          latitudeDelta: 0.0025,
+          longitudeDelta: 0.0025,
+        }}
+        style={{ height: "30%", width: "100%" }}
+        provider={PROVIDER_GOOGLE}
+        showsUserLocation={true}
+      >
+        {/* <Marker
             coordinate={currentLocation.coords}
             title="Current location"
           ></Marker> */}
-          {busStopsByLocation?.stopPoints?.map((s, idx) => {
-            return (
-              <Marker
-                key={s.id}
-                coordinate={{ latitude: s.lat ?? 0, longitude: s.lon ?? 0 }}
-                title={s.name}
-                description={"Stop: " + s.name}
-                onPress={() => {
-                  setSelectedBusStopIndex(idx);
+        {busStopsByLocation?.stopPoints?.map((s, idx) => {
+          return (
+            <Marker
+              key={s.id}
+              coordinate={{ latitude: s.lat ?? 0, longitude: s.lon ?? 0 }}
+              title={s.name}
+              description={"Stop: " + s.name}
+              onPress={() => {
+                setSelectedBusStopIndex(idx);
+              }}
+              onCalloutPress={() => {
+                console.log("Pressed");
+              }}
+            >
+              <View
+                style={{
+                  alignItems: "center",
+                  borderRadius: 100,
+                  height: 20,
+                  width: 20,
+                  margin: 0,
+                  padding: 0,
+                  backgroundColor: "red",
+                  justifyContent: "center",
+                  alignContent: "center",
                 }}
-                onCalloutPress={() => {
-                  console.log("Pressed");
+              >
+                <Text
+                  style={{
+                    color: "white",
+                    fontSize: s.stopLetter.length > 1 ? 10 : 14,
+                  }}
+                >
+                  {s.stopLetter}
+                </Text>
+              </View>
+              <Callout
+                style={{ width: 150 }}
+                onPress={() => {
+                  router.push(`/busStop/${s.id}`);
                 }}
               >
                 <View
                   style={{
-                    alignItems: "center",
-                    borderRadius: 100,
-                    height: 20,
-                    width: 20,
-                    margin: 0,
-                    padding: 0,
-                    backgroundColor: "red",
-                    justifyContent: "center",
-                    alignContent: "center",
+                    // position: "absolute",
+                    // top: 0,
+                    // left: 0,
+                    // width: "100%",
+                    width: 150,
+                    // borderColor: "gray",
+                    // borderWidth: 1,
+                    // borderRadius: 10,
+                    // borderStyle: "solid",
                   }}
                 >
-                  <Text
-                    style={{
-                      color: "white",
-                      fontSize: s.stopLetter.length > 1 ? 10 : 14,
-                    }}
-                  >
-                    {s.stopLetter}
+                  {(() => {
+                    console.log(s.commonName);
+                    return null;
+                  })()}
+                  <Text style={{ fontSize: 12 }}>
+                    {s.commonName} ({s.stopLetter})
                   </Text>
-                </View>
-                <Callout
-                  style={{ width: 150 }}
-                  onPress={() => {
-                    router.push(`/busStop/${s.id}`);
-                  }}
-                >
-                  <View
+                  {/* <Link href={`/busStop/${s.id}`} asChild> */}
+                  <Pressable
                     style={{
-                      // position: "absolute",
-                      // top: 0,
-                      // left: 0,
-                      // width: "100%",
+                      marginTop: 10,
+                      paddingVertical: 10,
+                      paddingHorizontal: 20,
                       width: 150,
-                      // borderColor: "gray",
-                      // borderWidth: 1,
-                      // borderRadius: 10,
-                      // borderStyle: "solid",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderColor: "gray",
+                      borderWidth: 1,
+                      borderRadius: 10,
+                      borderStyle: "solid",
+                    }}
+                    onPress={() => {
+                      console.log("Pressed Pressable");
                     }}
                   >
-                    {(() => {
-                      console.log(s.commonName);
-                      return null;
-                    })()}
-                    <Text style={{ fontSize: 12 }}>
-                      {s.commonName} ({s.stopLetter})
-                    </Text>
-                    {/* <Link href={`/busStop/${s.id}`} asChild> */}
-                    <Pressable
-                      style={{
-                        marginTop: 10,
-                        paddingVertical: 10,
-                        paddingHorizontal: 20,
-                        width: 150,
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        borderColor: "gray",
-                        borderWidth: 1,
-                        borderRadius: 10,
-                        borderStyle: "solid",
-                      }}
-                      onPress={() => {
-                        console.log("Pressed Pressable");
-                      }}
-                    >
-                      <Text style={{ fontSize: 10 }}>Go to Bus Stop </Text>
-                    </Pressable>
-                    {/* </Link> */}
-                    {/* <Text style={{ fontSize: 10 }}>{s.name}</Text> */}
-                  </View>
-                </Callout>
-                {/* <View
+                    <Text style={{ fontSize: 10 }}>Go to Bus Stop </Text>
+                  </Pressable>
+                  {/* </Link> */}
+                  {/* <Text style={{ fontSize: 10 }}>{s.name}</Text> */}
+                </View>
+              </Callout>
+              {/* <View
                   style={{
                     display: idx === selectedBusStopIndex ? "flex" : "none",
                     backgroundColor: "white",
@@ -198,21 +199,20 @@ export default function Index() {
                 >
                   <Text>{s.commonName}</Text>
                 </View> */}
-              </Marker>
-            );
-          })}
-          {/* <Marker
+            </Marker>
+          );
+        })}
+        {/* <Marker
             coordinate={currentLocation.coords}
             title="Test"
             description="Test Description"
           ></Marker> */}
-          {/* <UrlTile
+        {/* <UrlTile
             urlTemplate="http://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
             maximumZ={19}
             flipY={false}
           /> */}
-        </MapView>
-      )}
+      </MapView>
       <TextInput
         style={{
           borderStyle: "solid",
@@ -229,13 +229,14 @@ export default function Index() {
           }
           setSearchQuery(t);
         }}
+        placeholder="Search for a bus stop"
       ></TextInput>
 
-      {busStops?.matches?.map((s) => {
+      {busStops?.map((s) => {
         return (
-          <Text key={s.id} selectable={true}>
-            {s.id} - {s.name}
-          </Text>
+          <Link key={s.id} href={`/busStop/${s.id}`} asChild>
+            <Text selectable={true}>{s.commonName}</Text>
+          </Link>
         );
       })}
 
