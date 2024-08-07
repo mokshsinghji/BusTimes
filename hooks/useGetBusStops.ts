@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Api,
   TflApiPresentationEntitiesMatchedStop,
+  TflApiPresentationEntitiesPrediction,
   TflApiPresentationEntitiesSearchResponse,
   TflApiPresentationEntitiesStopPoint,
   TflApiPresentationEntitiesStopPointsResponse,
@@ -99,6 +100,31 @@ export function useGetBusStopsByLocation(
       }
     })();
   }, [location]);
+
+  return data;
+}
+
+export function useGetBusStopArrivals(id: string) {
+  const [data, setData] = useState<TflApiPresentationEntitiesPrediction[]>();
+
+  useEffect(() => {
+    console.log(new Date().toLocaleString(), "getting bus arrivals");
+
+    (async () => {
+      if (id.length > 0) {
+        const api = new Api();
+        const response = await api.stopPoint.stopPointArrivals(id);
+        const data =
+          (await response.json()) as TflApiPresentationEntitiesPrediction[];
+
+        data.sort((a, b) => {
+          return (a.timeToStation ?? 0) - (b.timeToStation ?? 0);
+        });
+
+        setData(data);
+      }
+    })();
+  }, [id]);
 
   return data;
 }

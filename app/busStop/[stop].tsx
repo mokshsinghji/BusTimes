@@ -1,4 +1,7 @@
-import { useGetBusStopInfo } from "@/hooks/useGetBusStops";
+import {
+  useGetBusStopArrivals,
+  useGetBusStopInfo,
+} from "@/hooks/useGetBusStops";
 import { useLocalSearchParams } from "expo-router";
 import { View, Text } from "react-native";
 import MapView, { Marker } from "react-native-maps";
@@ -6,6 +9,10 @@ import MapView, { Marker } from "react-native-maps";
 export default function BusStop() {
   const { stop } = useLocalSearchParams();
   const stopPairInfo = useGetBusStopInfo(
+    typeof stop === "string" ? stop : stop[0]
+  );
+
+  const stopArrivals = useGetBusStopArrivals(
     typeof stop === "string" ? stop : stop[0]
   );
 
@@ -47,6 +54,10 @@ export default function BusStop() {
           >
             <Text
               style={{
+                color: "white",
+                margin: 0,
+                padding: 0,
+                alignSelf: "center",
                 fontSize: 30,
               }}
             >
@@ -54,6 +65,19 @@ export default function BusStop() {
             </Text>
           </View>
           <Text style={{ fontSize: 20 }}>{stopInfo?.commonName}</Text>
+        </View>
+        <View>
+          <Text style={{ fontSize: 20 }}>Bus Arrivals</Text>
+          {stopArrivals?.map((a) => {
+            return (
+              <Text key={a.id} selectable>
+                {a.lineName} - {a.destinationName} -{" "}
+                {(a.timeToStation ?? 0) > 0
+                  ? `${Math.floor((a.timeToStation ?? 0) / 60)} mins`
+                  : "Arriving"}
+              </Text>
+            );
+          })}
         </View>
       </View>
     </View>
