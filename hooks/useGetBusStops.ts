@@ -57,10 +57,7 @@ export function useGetBusStopsBusInfo(ids: string[]) {
         const data = await response.json();
 
         console.log();
-        console.log(
-          "data is",
-          await api.stopPoint.stopPointArrivals(ids[0]).then((r) => r.json())
-        );
+        // console.log("data is", data[0].children[0].id);
         console.log();
 
         if (ids.length == 1) {
@@ -115,27 +112,36 @@ export function useGetBusStopsByLocation(
   return data;
 }
 
-export function useGetBusStopArrivals(id: string) {
+export function useGetBusStopArrivals(
+  id: string
+): [TflApiPresentationEntitiesPrediction[] | undefined, () => void, boolean] {
   const [data, setData] = useState<TflApiPresentationEntitiesPrediction[]>();
+  const [loading, setLoading] = useState(false);
+
+  const updateData = async () => {
+    setLoading(true);
+    if (id.length > 0) {
+      const api = new Api();
+      const response = await api.stopPoint.stopPointArrivals(id);
+      const data =
+        (await response.json()) as TflApiPresentationEntitiesPrediction[];
+
+      data.sort((a, b) => {
+        return (a.timeToStation ?? 0) - (b.timeToStation ?? 0);
+      });
+
+      await new Promise((r) => setTimeout(r, 200));
+
+      setData(data);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
     console.log(new Date().toLocaleString(), "getting bus arrivals");
-
-    (async () => {
-      if (id.length > 0) {
-        const api = new Api();
-        const response = await api.stopPoint.stopPointArrivals(id);
-        const data =
-          (await response.json()) as TflApiPresentationEntitiesPrediction[];
-
-        data.sort((a, b) => {
-          return (a.timeToStation ?? 0) - (b.timeToStation ?? 0);
-        });
-
-        setData(data);
-      }
-    })();
+    updateData();
+    setInterval(updateData, 15000);
   }, [id]);
 
-  return data;
+  return [data, updateData, loading];
 }

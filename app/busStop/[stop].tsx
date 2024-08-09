@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   useGetBusStopArrivals,
   useGetBusStopInfo,
 } from "@/hooks/useGetBusStops";
 import { useLocalSearchParams } from "expo-router";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 export default function BusStop() {
@@ -13,9 +13,10 @@ export default function BusStop() {
   const stopPairInfo = useGetBusStopInfo(
     typeof stop === "string" ? stop : stop[0]
   );
-  const stopArrivals = useGetBusStopArrivals(
+  const [stopArrivals, updateData, loading] = useGetBusStopArrivals(
     typeof stop === "string" ? stop : stop[0]
   );
+  // const [loading, setLoading] = useState(true);
   const stopInfo = stopPairInfo?.at(0)?.children?.find((c) => c.id === stop);
   // stopArrivals?.push(stopArrivals?.at(-1) ?? { id: "0", timeToStation: 0 });
   console.log(stopPairInfo?.at(0)?.children?.find((c) => c.id === stop));
@@ -40,26 +41,40 @@ export default function BusStop() {
           description={"Stop: " + stopInfo?.commonName}
         />
       </MapView>
+      {/* <Text style={{ position: "absolute", top: 0, left: 0 }}>
+        {stopInfo === undefined ? "undefined" : JSON.stringify(stopInfo)}
+      </Text> */}
       <View style={styles.contentContainer}>
         <View style={styles.header}>
           <View style={styles.stopLetterContainer}>
             <Text style={styles.stopLetter}>{stopInfo?.stopLetter}</Text>
           </View>
           <Text style={styles.stopName}>{stopInfo?.commonName}</Text>
+          <Pressable
+            onPress={() => {
+              updateData();
+            }}
+            style={styles.refreshButton}
+          >
+            <Text style={styles.refreshButtonText}>Refresh</Text>
+          </Pressable>
         </View>
         <Text style={styles.sectionTitle}>Bus Arrivals</Text>
         <ScrollView style={styles.scrollView}>
           <View style={styles.arrivalList}>
+            {loading === true && <Text>Loading...</Text>}
             {stopArrivals?.map((a) => (
               <View key={a.id} style={styles.arrivalItem}>
                 <View style={styles.lineNameContainer}>
                   <Text style={styles.lineName}>{a.lineName}</Text>
                 </View>
-                <Text style={styles.destinationName}>{a.destinationName}</Text>
+                <Text style={styles.destinationName} numberOfLines={2}>
+                  {a.destinationName}
+                </Text>
                 <Text style={styles.arrivalTime}>
-                  {(a.timeToStation ?? 0) > 0
+                  {(a.timeToStation ?? 0) > 60
                     ? `${Math.floor((a.timeToStation ?? 0) / 60)} mins`
-                    : "Arriving"}
+                    : `${a.timeToStation ?? 0} secs`}
                 </Text>
               </View>
             ))}
@@ -102,7 +117,18 @@ const styles = StyleSheet.create({
     fontSize: 36,
   },
   stopName: {
+    flex: 1,
     fontSize: 25,
+  },
+  refreshButton: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  refreshButtonText: {
+    color: "white",
+    fontSize: 20,
   },
   sectionTitle: {
     fontSize: 25,

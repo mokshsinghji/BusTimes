@@ -234,9 +234,15 @@ export default function Index() {
 
       {busStops?.map((s) => {
         return (
-          <Link key={s.id} href={`/busStop/${s.id}`} asChild>
-            <Text selectable={true}>{s.commonName}</Text>
-          </Link>
+          <>
+            {s.children?.map((b) => {
+              return (
+                <Link key={b.id} href={`/busStop/${b.id}`} asChild>
+                  <Text selectable={true}>{b.commonName}</Text>
+                </Link>
+              );
+            })}
+          </>
         );
       })}
 
