@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Button,
   Pressable,
@@ -5,47 +6,28 @@ import {
   TextInput,
   ToastAndroid,
   View,
+  StyleSheet,
+  ScrollView,
 } from "react-native";
 import {
   useGetBusStopInfo,
   useGetBusStops,
   useGetBusStopsByLocation,
 } from "@/hooks/useGetBusStops";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
 import * as Location from "expo-location";
-import MapView, {
-  Callout,
-  Marker,
-  PROVIDER_GOOGLE,
-  UrlTile,
-} from "react-native-maps";
+import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Link, router } from "expo-router";
 
 export default function Index() {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [id, setId] = useState("");
   const [currentLocation, setCurrentLocation] =
     useState<Location.LocationObject>();
 
   const busStops = useGetBusStops(debouncedSearchQuery);
-  // const tmpId = useMemo(() => busStops?.matches?.[5]?.id ?? "", [busStops]);
-  const busStop = useGetBusStopInfo(id);
-
   const busStopsByLocation = useGetBusStopsByLocation(currentLocation);
-
-  const [selectedBusStopIndex, setSelectedBusStopIndex] = useState(0);
-
-  // useEffect(() => {
-  //   if (busStops?.matches?.length ?? 0 > 5) {
-  //     const newValue = busStops?.matches?.[4]?.id ?? "";
-  //     if (busStops === newValue) {
-  //       return;
-  //     }
-  //     setId(newValue);
-  //   }
-  // }, [busStops]);
 
   useEffect(() => {
     console.log(busStopsByLocation);
@@ -81,13 +63,7 @@ export default function Index() {
   console.log("stopPoints:", busStops);
 
   return (
-    <View
-      style={{
-        flex: 1,
-        // justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
+    <View style={styles.container}>
       <MapView
         region={{
           latitude: currentLocation?.coords.latitude ?? 0,
@@ -95,170 +71,171 @@ export default function Index() {
           latitudeDelta: 0.0025,
           longitudeDelta: 0.0025,
         }}
-        style={{ height: "30%", width: "100%" }}
+        style={styles.map}
         provider={PROVIDER_GOOGLE}
         showsUserLocation={true}
       >
-        {/* <Marker
-            coordinate={currentLocation.coords}
-            title="Current location"
-          ></Marker> */}
-        {busStopsByLocation?.stopPoints?.map((s, idx) => {
-          return (
-            <Marker
-              key={s.id}
-              coordinate={{ latitude: s.lat ?? 0, longitude: s.lon ?? 0 }}
-              title={s.name}
-              description={"Stop: " + s.name}
+        {busStopsByLocation?.stopPoints?.map((s, idx) => (
+          <Marker
+            key={s.id}
+            coordinate={{ latitude: s.lat ?? 0, longitude: s.lon ?? 0 }}
+            title={s.name}
+            description={"Stop: " + s.name}
+          >
+            <View style={styles.markerView}>
+              <Text style={styles.markerText}>{s.stopLetter}</Text>
+            </View>
+            <Callout
+              style={styles.callout}
               onPress={() => {
-                setSelectedBusStopIndex(idx);
-              }}
-              onCalloutPress={() => {
-                console.log("Pressed");
+                router.push(`/busStop/${s.id}`);
               }}
             >
-              <View
-                style={{
-                  alignItems: "center",
-                  borderRadius: 100,
-                  height: 20,
-                  width: 20,
-                  margin: 0,
-                  padding: 0,
-                  backgroundColor: "red",
-                  justifyContent: "center",
-                  alignContent: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    color: "white",
-                    fontSize: s.stopLetter.length > 1 ? 10 : 14,
-                  }}
-                >
-                  {s.stopLetter}
+              <View style={styles.calloutView}>
+                <Text style={styles.calloutText}>
+                  {s.commonName} ({s.stopLetter})
                 </Text>
+                <Pressable
+                  style={styles.calloutButton}
+                  onPress={() => {
+                    console.log("Pressed Pressable");
+                  }}
+                >
+                  <Text style={styles.calloutButtonText}>Go to Bus Stop</Text>
+                </Pressable>
               </View>
-              <Callout
-                style={{ width: 150 }}
-                onPress={() => {
-                  router.push(`/busStop/${s.id}`);
-                }}
-              >
-                <View
-                  style={{
-                    // position: "absolute",
-                    // top: 0,
-                    // left: 0,
-                    // width: "100%",
-                    width: 150,
-                    // borderColor: "gray",
-                    // borderWidth: 1,
-                    // borderRadius: 10,
-                    // borderStyle: "solid",
-                  }}
-                >
-                  {(() => {
-                    console.log(s.commonName);
-                    return null;
-                  })()}
-                  <Text style={{ fontSize: 12 }}>
-                    {s.commonName} ({s.stopLetter})
-                  </Text>
-                  {/* <Link href={`/busStop/${s.id}`} asChild> */}
-                  <Pressable
-                    style={{
-                      marginTop: 10,
-                      paddingVertical: 10,
-                      paddingHorizontal: 20,
-                      width: 150,
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      borderColor: "gray",
-                      borderWidth: 1,
-                      borderRadius: 10,
-                      borderStyle: "solid",
-                    }}
-                    onPress={() => {
-                      console.log("Pressed Pressable");
-                    }}
-                  >
-                    <Text style={{ fontSize: 10 }}>Go to Bus Stop </Text>
-                  </Pressable>
-                  {/* </Link> */}
-                  {/* <Text style={{ fontSize: 10 }}>{s.name}</Text> */}
-                </View>
-              </Callout>
-              {/* <View
-                  style={{
-                    display: idx === selectedBusStopIndex ? "flex" : "none",
-                    backgroundColor: "white",
-                    position: "absolute",
-                  }}
-                >
-                  <Text>{s.commonName}</Text>
-                </View> */}
-            </Marker>
-          );
-        })}
-        {/* <Marker
-            coordinate={currentLocation.coords}
-            title="Test"
-            description="Test Description"
-          ></Marker> */}
-        {/* <UrlTile
-            urlTemplate="http://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            maximumZ={19}
-            flipY={false}
-          /> */}
+            </Callout>
+          </Marker>
+        ))}
       </MapView>
       <TextInput
-        style={{
-          borderStyle: "solid",
-          padding: 10,
-          width: "80%",
-          margin: 20,
-          borderColor: "gray",
-          borderWidth: 1,
-        }}
+        style={styles.searchInput}
         value={searchQuery}
         onChangeText={(t) => {
-          if (searchQuery === t) {
-            return;
+          if (searchQuery !== t) {
+            setSearchQuery(t);
           }
-          setSearchQuery(t);
         }}
         placeholder="Search for a bus stop"
-      ></TextInput>
+      />
 
-      {busStops?.map((s) => {
-        return (
-          <>
-            {s.children?.map((b) => {
-              return (
-                <Link key={b.id} href={`/busStop/${b.id}`} asChild>
-                  <Text selectable={true}>{b.commonName}</Text>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.busStopList}>
+          {busStops?.map((s) => (
+            <React.Fragment key={s.id}>
+              {s.children?.map((b) => (
+                <Link
+                  key={b.id}
+                  href={`/busStop/${b.id}`}
+                  style={styles.busStopLink}
+                  asChild
+                >
+                  <Pressable style={styles.busStopItem}>
+                    <View style={styles.busStopLetterContainer}>
+                      <Text style={styles.busStopLetter}>{b.stopLetter}</Text>
+                    </View>
+                    <Text style={styles.busStopName}>{b.commonName}</Text>
+                  </Pressable>
                 </Link>
-              );
-            })}
-          </>
-        );
-      })}
-
-      <View
-        style={{
-          marginTop: 30,
-        }}
-      >
-        {busStop?.at(0)?.children?.map((b) => {
-          return (
-            <Text key={b.id} selectable>
-              {b.id} - {b.commonName} ({b.stopLetter})
-            </Text>
-          );
-        })}
-      </View>
+              ))}
+            </React.Fragment>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+  },
+  map: {
+    height: "30%",
+    width: "100%",
+  },
+  markerView: {
+    alignItems: "center",
+    borderRadius: 10,
+    height: 20,
+    width: 20,
+    backgroundColor: "red",
+    justifyContent: "center",
+  },
+  markerText: {
+    color: "white",
+    fontSize: 14,
+  },
+  callout: {
+    width: 150,
+  },
+  calloutView: {
+    width: 150,
+  },
+  calloutText: {
+    fontSize: 12,
+  },
+  calloutButton: {
+    marginTop: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    width: 150,
+    justifyContent: "center",
+    alignItems: "center",
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 10,
+  },
+  calloutButtonText: {
+    fontSize: 10,
+  },
+  searchInput: {
+    borderStyle: "solid",
+    padding: 10,
+    margin: 20,
+    borderColor: "gray",
+    borderWidth: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  busStopList: {
+    gap: 10,
+    padding: 10,
+    // borderColor: "gray",
+    // borderWidth: 1,
+    // borderStyle: "solid",
+  },
+  busStopLink: {
+    // borderColor: "gray",
+    // borderWidth: 1,
+    // borderStyle: "solid",
+    width: "100%",
+    // No specific styles needed
+  },
+  busStopItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    height: 60,
+    backgroundColor: "#f8f8f8",
+    paddingHorizontal: 10,
+  },
+  busStopLetterContainer: {
+    height: 40,
+    width: 40,
+    backgroundColor: "red",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 20,
+  },
+  busStopLetter: {
+    color: "white",
+    fontSize: 20,
+  },
+  busStopName: {
+    fontSize: 20,
+    flex: 1,
+  },
+});

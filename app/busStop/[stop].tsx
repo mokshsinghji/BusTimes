@@ -6,6 +6,7 @@ import {
 import { useLocalSearchParams } from "expo-router";
 import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
 import MapView, { Marker } from "react-native-maps";
+import { useRelativeTime } from "@/hooks/useRelativeTime";
 
 export default function BusStop() {
   // ... (keep your existing variable declarations and logic)
@@ -13,9 +14,10 @@ export default function BusStop() {
   const stopPairInfo = useGetBusStopInfo(
     typeof stop === "string" ? stop : stop[0]
   );
-  const [stopArrivals, updateData, loading] = useGetBusStopArrivals(
-    typeof stop === "string" ? stop : stop[0]
-  );
+  const [stopArrivals, updateData, loading, lastUpdated] =
+    useGetBusStopArrivals(typeof stop === "string" ? stop : stop[0]);
+
+  const relativeTime = useRelativeTime(lastUpdated ?? new Date());
   // const [loading, setLoading] = useState(true);
   const stopInfo = stopPairInfo?.at(0)?.children?.find((c) => c.id === stop);
   // stopArrivals?.push(stopArrivals?.at(-1) ?? { id: "0", timeToStation: 0 });
@@ -54,15 +56,23 @@ export default function BusStop() {
             onPress={() => {
               updateData();
             }}
-            style={styles.refreshButton}
+            style={
+              loading ? styles.refreshButtonDisabled : styles.refreshButton
+            }
           >
-            <Text style={styles.refreshButtonText}>Refresh</Text>
+            <Text style={styles.refreshButtonText} disabled={loading}>
+              {/* {loading ? "Loading..." : "Refresh"} */}
+              Refresh
+            </Text>
           </Pressable>
         </View>
+        <Text style={{ textAlign: "right", fontSize: 15 }}>
+          Last updated at: {relativeTime}
+        </Text>
         <Text style={styles.sectionTitle}>Bus Arrivals</Text>
         <ScrollView style={styles.scrollView}>
           <View style={styles.arrivalList}>
-            {loading === true && <Text>Loading...</Text>}
+            {/* {loading === true && <Text>Loading...</Text>} */}
             {stopArrivals?.map((a) => (
               <View key={a.id} style={styles.arrivalItem}>
                 <View style={styles.lineNameContainer}>
@@ -125,6 +135,20 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     marginTop: 10,
+    width: 120,
+    textAlign: "center",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  refreshButtonDisabled: {
+    backgroundColor: "#f87171",
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 10,
+    width: 120,
+    textAlign: "center",
+    alignItems: "center",
+    justifyContent: "center",
   },
   refreshButtonText: {
     color: "white",

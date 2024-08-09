@@ -114,9 +114,15 @@ export function useGetBusStopsByLocation(
 
 export function useGetBusStopArrivals(
   id: string
-): [TflApiPresentationEntitiesPrediction[] | undefined, () => void, boolean] {
+): [
+  TflApiPresentationEntitiesPrediction[] | undefined,
+  () => void,
+  boolean,
+  Date | undefined
+] {
   const [data, setData] = useState<TflApiPresentationEntitiesPrediction[]>();
   const [loading, setLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date>();
 
   const updateData = async () => {
     setLoading(true);
@@ -130,18 +136,20 @@ export function useGetBusStopArrivals(
         return (a.timeToStation ?? 0) - (b.timeToStation ?? 0);
       });
 
-      await new Promise((r) => setTimeout(r, 200));
+      // await new Promise((r) => setTimeout(r, 200));
 
       setData(data);
     }
+    setLastUpdated(new Date());
     setLoading(false);
   };
 
   useEffect(() => {
     console.log(new Date().toLocaleString(), "getting bus arrivals");
     updateData();
-    setInterval(updateData, 15000);
+    const timeout = setInterval(updateData, 15000);
+    return () => clearInterval(timeout);
   }, [id]);
 
-  return [data, updateData, loading];
+  return [data, updateData, loading, lastUpdated];
 }
